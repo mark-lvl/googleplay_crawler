@@ -13,6 +13,12 @@ class BasicSpider(scrapy.Spider):
     start_urls = ['https://play.google.com/store/apps/details?id=com.aa.generaladaptiveapps']
 
     def parse(self, response):
+        """ This function parses an application page in Google Play.
+        @url https://play.google.com/store/apps/details?id=com.aa.generaladaptiveapps
+        @returns items 1
+        @scrapes App_name Genre
+        @scrapes URL Project Spider Server Date
+        """
         l = ItemLoader(item=GplayItem(), response=response)
         l.add_xpath('App_name',
                     '//*[@itemprop="name"]/span/text()',
