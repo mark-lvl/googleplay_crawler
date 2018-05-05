@@ -11,7 +11,6 @@ from scrapy.item import Item, Field
 class GplayItem(Item):
     # Primary fields
     App_name        = Field()
-    Link            = Field()
     Updated         = Field()
     Author          = Field()
     Filesize        = Field()
@@ -32,8 +31,8 @@ class GplayItem(Item):
     Developer_ID    = Field()
 
     # Housekeeping fields
-    url             = Field()
-    project         = Field()
-    spider          = Field()
-    server          = Field()
-    date            = Field()
+    URL             = Field()
+    Project         = Field()
+    Spider          = Field()
+    Server          = Field()
+    Date            = Field()
