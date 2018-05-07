@@ -88,3 +88,14 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# CUSTOM SETTINGS
+DEBUG = 'INFO'
+LOGSTATS_INTERVAL = 5.0
+LOG_FILE = 'spider.log'
+## Close spider after x seconds
+# CLOSESPIDER_TIMEOUT = 5
+## Close spider after 100 items
+# CLOSESPIDER_ITEMCOUNT = 100
+## Close spider after occuring 100 errors
+# CLOSESPIDER_ERRORCOUNT = 10
