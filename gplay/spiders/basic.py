@@ -28,27 +28,27 @@ class BasicSpider(scrapy.Spider):
         
         l.add_xpath('Genre',
                     '//*[@itemprop="genre"]/text()',
-                    MapCompose(str.strip, str.lower))
-
-        l.add_xpath('Price',
-                    '//*[@itemprop="price"]/@content',
-                    MapCompose(lambda i: re.findall("\d+\,\d+", i)))
+                    MapCompose(str.strip, str.lower), Join("|"))
         
-        editor_choice = response.xpath('//img[@alt="Editors\' Choice"]/following-sibling::span[text()="Editors\' Choice"]')
-        l.add_value('Editor_choice', 1 if editor_choice else 0)
+        l.add_xpath('Price','//*[@itemprop="price"]/@content', re="[,.0-9]+")
+
+        #editor_choice = response.xpath('//img[@alt="Editors\' Choice"]/following-sibling::span[text()="Editors\' Choice"]')
+        editor_choice = response.xpath('//*[@itemprop="editorsChoiceBadgeUrl"]')
+        l.add_value('Editor_choice', int(bool(editor_choice)))
         
         l.add_xpath('Developer',
-                    '//span/a[@itemprop="genre"]/preceding::span/a/text()',
+                    '//span/a[@itemprop="genre"][1]/../../span[1]/a/text()',
                     MapCompose(str.strip))
         
         l.add_xpath('Developer_URL',
-                    '//span/a[@itemprop="genre"]/preceding::span/a/@href',
+                    '//span/a[@itemprop="genre"][1]/../../span[1]/a/@href',
                     MapCompose(str.strip))
         
         
         l.add_xpath('Content_rating',
-                    '//div[contains(text(),"Content Rating")]/following-sibling::span/div/span/div/text()',
+                    '//div[contains(text(),"Content Rating")]/following-sibling::span/div/span/div[1]/text()',
                     MapCompose(str.strip))
+        
         """ Calculating promotions in app
         0: no promotion
         1: Contains Adds
@@ -65,7 +65,7 @@ class BasicSpider(scrapy.Spider):
 
         l.add_xpath('Description',
                     '//content/div/text()',
-                    MapCompose(str.strip, lambda i: i.replace("'", ''), str.lower))
+                    MapCompose(str.strip, lambda i: i.replace("'", ''), str.lower), Join())
 
         l.add_xpath('App_rate',
                     '//div[contains(@aria-label,"stars out of five stars")]/text()',
@@ -88,9 +88,12 @@ class BasicSpider(scrapy.Spider):
             l.add_xpath(field_name,
                         '//div/div/div/div[text()="'+str(xpath_name)+'"]/following-sibling::span/div/span/text()')
 
-        l.add_xpath('Developer_loc',
-                    '//div/span/div/span/div/a[text()="Privacy Policy"]/../following-sibling::div',
-                    MapCompose(str.strip, lambda i: i.replace("'", ''), str.lower))
+        l.add_xpath('Developer_location',
+                    '//div/span/div/span/div/a[text()="Privacy Policy"]/../following-sibling::div/text()',
+                    MapCompose(str.strip, 
+                               lambda i: i.replace("'", ''), 
+                               lambda i: i.replace("\n", ' '), 
+                               str.lower))
         
 
         ## Filling housekeeping fields
