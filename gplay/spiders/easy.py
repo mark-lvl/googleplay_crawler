@@ -14,7 +14,7 @@ from urllib.parse import urljoin
 class EasySpider(CrawlSpider):
     name = 'easy'
     allowed_domains = ['play.google.com']
-    start_urls = ['https://play.google.com/store/apps/']
+    start_urls = ['https://play.google.com/store/apps/details?id=homeworkout.homeworkouts.noequipment']
 
     rules = (
         # First rule: only scan target pages - without scraping
@@ -37,6 +37,9 @@ class EasySpider(CrawlSpider):
         l.add_xpath('Genre',
                     '//*[@itemprop="genre"]/text()',
                     MapCompose(str.strip))
+        editor_choice = response.xpath('//img[@alt="Editors\' Choice"]/following-sibling::span[text()="Editors\' Choice"]')
+        editor_choice = 1 if editor_choice else 0
+        l.add_value('Editor_choice', editor_choice)
 
         ## Filling housekeeping fields
         l.add_value('URL', response.url)

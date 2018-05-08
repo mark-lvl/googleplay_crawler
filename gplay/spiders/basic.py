@@ -5,33 +5,99 @@ from scrapy.loader.processors import MapCompose, Join
 from gplay.items import GplayItem
 import datetime
 import socket
+import re
 
 
 class BasicSpider(scrapy.Spider):
     name = 'basic'
     allowed_domains = ['play.google.com']
-    start_urls = ['https://play.google.com/store/apps/details?id=com.aa.generaladaptiveapps']
+    start_urls = ['https://play.google.com/store/apps/details?id=homeworkout.homeworkouts.noequipment']
 
     def parse(self, response):
         """ This function parses an application page in Google Play.
-        @url https://play.google.com/store/apps/details?id=com.aa.generaladaptiveapps
+        @url https://play.google.com/store/apps/details?id=com.mojang.minecraftpe
         @returns items 1
         @scrapes App_name Genre
         @scrapes URL Project Spider Server Date
         """
         l = ItemLoader(item=GplayItem(), response=response)
+        
         l.add_xpath('App_name',
                     '//*[@itemprop="name"]/span/text()',
-                    MapCompose(str.strip))
+                    MapCompose(str.strip, str.lower))
+        
         l.add_xpath('Genre',
                     '//*[@itemprop="genre"]/text()',
+                    MapCompose(str.strip, str.lower))
+
+        l.add_xpath('Price',
+                    '//*[@itemprop="price"]/@content',
+                    MapCompose(lambda i: re.findall("\d+\,\d+", i)))
+        
+        editor_choice = response.xpath('//img[@alt="Editors\' Choice"]/following-sibling::span[text()="Editors\' Choice"]')
+        l.add_value('Editor_choice', 1 if editor_choice else 0)
+        
+        l.add_xpath('Developer',
+                    '//span/a[@itemprop="genre"]/preceding::span/a/text()',
                     MapCompose(str.strip))
+        
+        l.add_xpath('Developer_URL',
+                    '//span/a[@itemprop="genre"]/preceding::span/a/@href',
+                    MapCompose(str.strip))
+        
+        
+        l.add_xpath('Content_rating',
+                    '//div[contains(text(),"Content Rating")]/following-sibling::span/div/span/div/text()',
+                    MapCompose(str.strip))
+        """ Calculating promotions in app
+        0: no promotion
+        1: Contains Adds
+        2: Offers in-app purchases
+        3: Contains Adds . Offers in-app purchases
+        """
+        promotion = 0
+        promotion_selector = response.xpath('//div[contains(text(), "Contains Ads") or contains(text(), "Offers in-app purchases")]/text()').extract()
+        if ("Contains Ads" in promotion_selector):
+            promotion = promotion + 1
+        if ("Offers in-app purchases" in promotion_selector):
+            promotion = promotion + 2
+        l.add_value('Promotion', promotion)
+
+        l.add_xpath('Description',
+                    '//content/div/text()',
+                    MapCompose(str.strip, lambda i: i.replace("'", ''), str.lower))
+
+        l.add_xpath('App_rate',
+                    '//div[contains(@aria-label,"stars out of five stars")]/text()',
+                    MapCompose(float))
+        
+        l.add_xpath('Reviewers_count',
+                    '(//span[contains(@aria-label,"ratings")])[1]/text()')
+
+        # There are five grades in star for rating apps
+        for i in range(5, 0,-1):
+            l.add_xpath('Rate_'+str(i)+'star',
+                        '//div/div/span[text()='+str(i)+']/following-sibling::span/@title')
+
+        # Batch scraping fields at the bottom of the app page
+        info_fields = {"Update_date":"Updated", "Filesize":"Size", "Install_count":"Installs", 
+                       "Version":"Current Version", "Android_version":"Requires Android",
+                       "Inapp_products":"In-app Products", "Offered_by":"Offered By"}
+        
+        for field_name, xpath_name in info_fields.items():
+            l.add_xpath(field_name,
+                        '//div/div/div/div[text()="'+str(xpath_name)+'"]/following-sibling::span/div/span/text()')
+
+        l.add_xpath('Developer_loc',
+                    '//div/span/div/span/div/a[text()="Privacy Policy"]/../following-sibling::div',
+                    MapCompose(str.strip, lambda i: i.replace("'", ''), str.lower))
+        
 
         ## Filling housekeeping fields
         l.add_value('URL', response.url)
-        l.add_value('Project', self.settings.get('BOT_NAME'))
-        l.add_value('Spider', self.name)
-        l.add_value('Server', socket.gethostname())
-        l.add_value('Date', datetime.datetime.now())
+        l.add_value('Scraper_project', self.settings.get('BOT_NAME'))
+        l.add_value('Scraper_spider', self.name)
+        l.add_value('Scraper_server', socket.gethostname())
+        l.add_value('Scraper_date', datetime.datetime.now())
         
         return l.load_item()
