@@ -90,9 +90,10 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # CUSTOM SETTINGS
-DEBUG = 'INFO'
-LOGSTATS_INTERVAL = 5.0
-LOG_FILE = 'spider.log'
+LOG_ENABLED = False
+#DEBUG = 'CRITICAL'
+#LOGSTATS_INTERVAL = 10.0
+#LOG_FILE = 'spider.log'
 ## Close spider after x seconds
 # CLOSESPIDER_TIMEOUT = 5
 ## Close spider after 100 items
