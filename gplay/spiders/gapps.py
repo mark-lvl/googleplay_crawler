@@ -30,6 +30,8 @@ class GappsSpider(CrawlSpider):
         
         l.add_xpath('App_name', '//*[@itemprop="name"]/span/text()')
         
+        l.add_xpath('Package_name', '//meta[@property="og:url"]/@content')
+        
         l.add_xpath('Genre', '//*[@itemprop="genre"]/text()')
         
         l.add_xpath('Price', '//*[@itemprop="price"]/@content')

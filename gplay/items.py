@@ -23,6 +23,7 @@ class GplayItem(Item):
     
     # Primary fields
     App_name          = Field(input_processor=MapCompose(str.strip, str.lower))
+    Package_name      = Field(input_processor=MapCompose(lambda x: re.search(r'details\?id=(.*)\&',x).group(1)))
     Genre             = Field(input_processor=MapCompose(str.strip, str.lower),
                               output_processor=Join("|"))
     Price             = Field(input_processor=MapCompose(lambda x: re.search(r"[,.0-9]+",x).group()))

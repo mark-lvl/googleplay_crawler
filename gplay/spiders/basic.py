@@ -14,6 +14,15 @@ class BasicSpider(scrapy.Spider):
     #start_urls = ['https://play.google.com/store/apps/details?id=com.solverlimited.woc2']
     start_urls = ['https://play.google.com/store/apps/details?id=com.mojang.minecraftpe']
 
+    #def parse(self, response):
+        # DEBUGGING SCRAPY: We want to inspect one specific response.
+        #if ".org" in response.url:
+        #    from scrapy.shell import inspect_response
+        #    inspect_response(response, self)
+
+    # RUN in TERMINAL by
+    # scrapy crawl basic -o spider.jl -s CLOSESPIDER_PAGECOUNT=100 --logfile log.log
+
     def parse(self, response):
         """ This function parses an application page in Google Play.
         @url https://play.google.com/store/apps/details?id=com.mojang.minecraftpe
@@ -21,9 +30,14 @@ class BasicSpider(scrapy.Spider):
         @scrapes App_name Genre
         @scrapes URL Project Spider Server Date
         """
+        # DEBUGGING SCRAPY: Logging in Scrapy
+        # logger = logging.getLogger()
+        # logger.warning("Your Message here")
         l = ItemLoader(item=GplayItem(), response=response)
         
         l.add_xpath('App_name', '//*[@itemprop="name"]/span/text()')
+        
+        l.add_xpath('Package_name', '//meta[@property="og:url"]/@content')
         
         l.add_xpath('Genre', '//*[@itemprop="genre"]/text()')
         
