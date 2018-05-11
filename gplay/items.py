@@ -13,11 +13,17 @@ import re
 """
 def promotion_status(value):
     promotion = 0
+    if not value:
+        return "0"
     if ("Contains Ads" in value):
             promotion = promotion + 1
     if ("Offers in-app purchases" in value):
         promotion = promotion + 2
     return promotion
+
+def set_default(value):
+    if not value:
+        return "NULL"
 
 class GplayItem(Item):
     
@@ -54,7 +60,7 @@ class GplayItem(Item):
     Filesize          = Field()
     Install_count     = Field()
     Android_version   = Field()
-    Inapp_products    = Field()
+    Inapp_products    = Field(input_processor=Compose(set_default))
     Offered_by        = Field()
 
     # Housekeeping fields

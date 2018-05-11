@@ -23,6 +23,9 @@ class BasicSpider(scrapy.Spider):
     # RUN in TERMINAL by
     # scrapy crawl basic -o spider.jl -s CLOSESPIDER_PAGECOUNT=100 --logfile log.log
 
+    # Debugging the spider in terminal
+    # scrapy parse --spider=gapps -c parse_item -d 2 -v https://play.google.com/store/apps/details?id=com.mojang.minecraftp
+
     def parse(self, response):
         """ This function parses an application page in Google Play.
         @url https://play.google.com/store/apps/details?id=com.mojang.minecraftpe
@@ -33,6 +36,10 @@ class BasicSpider(scrapy.Spider):
         # DEBUGGING SCRAPY: Logging in Scrapy
         # logger = logging.getLogger()
         # logger.warning("Your Message here")
+        # logger.debug("Your Message here")
+        # Inside the spider we can eaily use:
+        # self.logger.info('Your Message here')
+
         l = ItemLoader(item=GplayItem(), response=response)
         
         l.add_xpath('App_name', '//*[@itemprop="name"]/span/text()')
@@ -80,6 +87,6 @@ class BasicSpider(scrapy.Spider):
         l.add_value('Scraper_project', self.settings.get('BOT_NAME'))
         l.add_value('Scraper_spider', self.name)
         l.add_value('Scraper_server', socket.gethostname())
-        l.add_value('Scraper_date', datetime.datetime.now())
+        l.add_value('Scraper_date', str(datetime.datetime.now()))
         
         return l.load_item()
